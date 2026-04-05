@@ -1,0 +1,7 @@
+{
+  "name": "TalentFlow3",
+  "description": "An AI-powered learning platform to create content, automate workflows, and train any audience. TalentFlow provides a comprehensive ecosystem for scalable and personalized learning experiences.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

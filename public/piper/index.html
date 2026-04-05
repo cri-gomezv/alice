@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piper TTS — Síntesis de voz local</title>
+  <link rel="stylesheet" href="./tailwind.min.css">
+  <!--
+    CORS IMPORTANTE: Este archivo DEBE servirse desde un servidor HTTP, NO con file://
+    Ver README_SETUP.md para instrucciones. Opciones rápidas:
+      python3 -m http.server 8080
+      → abrir http://localhost:8080/piper/
+
+    Si ves errores "SharedArrayBuffer is not defined", el servidor necesita headers COOP/COEP.
+    Usa serve_coop.py incluido en este proyecto.
+  -->
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="border-b border-gray-800 px-6 py-4">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold text-white">🔊 Piper TTS Local</h1>
+        <p class="text-gray-400 text-xs mt-0.5">Síntesis de voz 100% en tu navegador · Sin servidor · Sin API</p>
+      </div>
+      <span class="text-xs bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full font-medium">Offline</span>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-2xl mx-auto w-full p-6 flex flex-col gap-5">
+
+    <!-- SELECTOR DE VOZ -->
+    <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <label class="block text-sm font-medium text-gray-300 mb-2">Voz</label>
+      <select id="voice-select"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+        <!-- Opciones cargadas por script.js -->
+      </select>
+      <p id="voice-info" class="text-xs text-gray-500 mt-2">
+        Selecciona una voz para ver detalles del modelo.
+      </p>
+    </div>
+
+    <!-- ÁREA DE TEXTO -->
+    <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <label class="block text-sm font-medium text-gray-300 mb-2">Texto a sintetizar</label>
+      <textarea id="text-input"
+                rows="5"
+                placeholder="Escribe el texto que quieres convertir a voz..."
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y text-sm">Bienvenidos al sistema de síntesis de voz de Piper, funcionando completamente en tu navegador sin necesidad de internet.</textarea>
+      <div class="flex justify-end mt-1">
+        <span id="char-count" class="text-xs text-gray-600">0 caracteres</span>
+      </div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="flex gap-3">
+      <button id="load-btn"
+              class="flex-1 bg-blue-700 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm">
+        ⬇ Cargar modelo
+      </button>
+      <button id="generate-btn"
+              disabled
+              class="flex-1 bg-emerald-700 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm">
+        🎙️ Generar voz
+      </button>
+    </div>
+
+    <!-- BARRA DE PROGRESO -->
+    <div id="progress-container" class="hidden">
+      <div class="w-full bg-gray-800 rounded-full h-1.5">
+        <div id="progress-bar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-200" style="width: 0%"></div>
+      </div>
+      <p id="progress-text" class="text-xs text-gray-500 mt-1 text-right">0%</p>
+    </div>
+
+    <!-- ESTADO -->
+    <div id="status-bar"
+         class="bg-gray-900 rounded-xl p-4 border border-gray-800 flex items-center gap-3 min-h-[60px]">
+      <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-gray-600 flex-shrink-0"></div>
+      <div class="flex-1 min-w-0">
+        <p id="status-text" class="text-sm font-medium text-gray-300">Sin inicializar</p>
+        <p id="status-detail" class="text-xs text-gray-500 mt-0.5 truncate">Selecciona una voz y carga el modelo.</p>
+      </div>
+    </div>
+
+    <!-- PLAYER DE AUDIO -->
+    <div id="audio-container" class="hidden bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <p class="text-sm font-medium text-gray-300 mb-3">Audio generado</p>
+      <audio id="audio-player" controls class="w-full"></audio>
+      <div class="flex gap-2 mt-3">
+        <button id="download-btn"
+                class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-lg transition-colors">
+          ⬇ Descargar WAV
+        </button>
+      </div>
+    </div>
+
+    <!-- DIAGNÓSTICO (oculto por defecto, aparece en error) -->
+    <div id="debug-container" class="hidden bg-gray-900 rounded-xl p-4 border border-red-900">
+      <p class="text-xs font-medium text-red-400 mb-2">🔍 Diagnóstico</p>
+      <pre id="debug-text" class="text-xs text-gray-400 whitespace-pre-wrap overflow-auto max-h-32"></pre>
+    </div>
+
+  </main>
+
+  <!-- FOOTER DE LICENCIAS -->
+  <footer class="border-t border-gray-800 p-4 text-center text-xs text-gray-600">
+    <p>
+      Modelos de voz por
+      <a href="https://github.com/rhasspy/piper" target="_blank" class="text-gray-500 hover:text-gray-400 underline">Rhasspy Piper</a>
+      · Licencia <span id="footer-license">MIT</span>
+      · Motor WASM por
+      <a href="https://github.com/wide-video/piper-wasm" target="_blank" class="text-gray-500 hover:text-gray-400 underline">wide-video/piper-wasm</a>
+      ·
+      <a href="https://huggingface.co/rhasspy/piper-voices" target="_blank" class="text-gray-500 hover:text-gray-400 underline">Modelos HuggingFace</a>
+    </p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
