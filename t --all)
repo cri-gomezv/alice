@@ -1,0 +1,40 @@
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[m// Configure [1;31mAWS[m SDK
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[m// Cast window to `any` to access the [1;31mAWS[m object from the global scope.
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[mif ((window as any).[1;31mAWS[m) {
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[m    (window as any).[1;31mAWS[m.config.update(awsConfig);
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[mconst Polly = (window as any).[1;31mAWS[m ? new (window as any).[1;31mAWS[m.Polly({ apiVersion: '2016-06-10' }) : null;
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[m        console.error('[1;31mAWS[m SDK or Polly service not initialized.');
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:services/polly.ts[m[36m:[m        return Promise.reject('[1;31mAWS[m SDK not initialized.');
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:utils/aws-config.ts[m[36m:[m  region: import.meta.env.VITE_[1;31mAWS[m_REGION ?? 'us-east-1',
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:utils/aws-config.ts[m[36m:[m    accessKeyId:     import.meta.env.VITE_[1;31mAWS[m_ACCESS_KEY_ID     ?? '',
+[35md7f5102b347dd58e3e83d7c5340aa693ac7e986f:utils/aws-config.ts[m[36m:[m    secretAccessKey: import.meta.env.VITE_[1;31mAWS[m_SECRET_ACCESS_KEY ?? '',
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[m// Configure [1;31mAWS[m SDK
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[m// Cast window to `any` to access the [1;31mAWS[m object from the global scope.
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[mif ((window as any).[1;31mAWS[m) {
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[m    (window as any).[1;31mAWS[m.config.update(awsConfig);
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[mconst Polly = (window as any).[1;31mAWS[m ? new (window as any).[1;31mAWS[m.Polly({ apiVersion: '2016-06-10' }) : null;
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[m        console.error('[1;31mAWS[m SDK or Polly service not initialized.');
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:services/polly.ts[m[36m:[m        return Promise.reject('[1;31mAWS[m SDK not initialized.');
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:utils/aws-config.ts[m[36m:[m  region: import.meta.env.VITE_[1;31mAWS[m_REGION ?? 'us-east-1',
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:utils/aws-config.ts[m[36m:[m    accessKeyId:     import.meta.env.VITE_[1;31mAWS[m_ACCESS_KEY_ID     ?? '',
+[35m34bd6c06103a8b55bd5c1ab00c3e4e7913a2fd33:utils/aws-config.ts[m[36m:[m    secretAccessKey: import.meta.env.VITE_[1;31mAWS[m_SECRET_ACCESS_KEY ?? '',
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[m// Configure [1;31mAWS[m SDK
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[m// Cast window to `any` to access the [1;31mAWS[m object from the global scope.
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[mif ((window as any).[1;31mAWS[m) {
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[m    (window as any).[1;31mAWS[m.config.update(awsConfig);
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[mconst Polly = (window as any).[1;31mAWS[m ? new (window as any).[1;31mAWS[m.Polly({ apiVersion: '2016-06-10' }) : null;
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[m        console.error('[1;31mAWS[m SDK or Polly service not initialized.');
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:services/polly.ts[m[36m:[m        return Promise.reject('[1;31mAWS[m SDK not initialized.');
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:utils/aws-config.ts[m[36m:[m  region: import.meta.env.VITE_[1;31mAWS[m_REGION ?? 'us-east-1',
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:utils/aws-config.ts[m[36m:[m    accessKeyId:     import.meta.env.VITE_[1;31mAWS[m_ACCESS_KEY_ID     ?? '',
+[35ma9c17500c4e161fab558bf73acacdfe3c274ca8d:utils/aws-config.ts[m[36m:[m    secretAccessKey: import.meta.env.VITE_[1;31mAWS[m_SECRET_ACCESS_KEY ?? '',
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[m// Configure [1;31mAWS[m SDK
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[m// Cast window to `any` to access the [1;31mAWS[m object from the global scope.
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[mif ((window as any).[1;31mAWS[m) {
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[m    (window as any).[1;31mAWS[m.config.update(awsConfig);
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[mconst Polly = (window as any).[1;31mAWS[m ? new (window as any).[1;31mAWS[m.Polly({ apiVersion: '2016-06-10' }) : null;
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[m        console.error('[1;31mAWS[m SDK or Polly service not initialized.');
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:services/polly.ts[m[36m:[m        return Promise.reject('[1;31mAWS[m SDK not initialized.');
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:utils/aws-config.ts[m[36m:[m  region: import.meta.env.VITE_[1;31mAWS[m_REGION ?? 'us-east-1',
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:utils/aws-config.ts[m[36m:[m    accessKeyId:     import.meta.env.VITE_[1;31mAWS[m_ACCESS_KEY_ID     ?? '',
+[35m8403e425cfd9b03de75a5a2ce029686f8d022e5f:utils/aws-config.ts[m[36m:[m    secretAccessKey: import.meta.env.VITE_[1;31mAWS[m_SECRET_ACCESS_KEY ?? '',

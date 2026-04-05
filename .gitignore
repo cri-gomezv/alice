@@ -23,6 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 public/piper/models
-.env.development
-.env.production
-.env.local
+.env
+.env.*
+env.*
