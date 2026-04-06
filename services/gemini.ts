@@ -78,8 +78,9 @@ async function loadCharacterConfig(characterName: CharacterName): Promise<Record
     if (characterConfigs[characterName]) return characterConfigs[characterName];
 
     // Los JSON están en /public/characters/ copiados desde FuncionaBien/
-    const res = await fetch(`/characters/${characterName}.json`);
-    if (!res.ok) throw new Error(`No se pudo cargar /characters/${characterName}.json (HTTP ${res.status})`);
+    const url = `${import.meta.env.BASE_URL}characters/${characterName}.json`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`No se pudo cargar ${url} (HTTP ${res.status})`);
 
     const fullConfig = await res.json();
     const params = fullConfig[LANGUAGE] as Record<string, string>;

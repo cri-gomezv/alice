@@ -12,7 +12,8 @@ const FRAME_MS = 200;  // ms por frame (ajusta para velocidad: ↑ = más lento)
 
 // ── URL del frame ─────────────────────────────────────────────────────────────
 export function frameUrl(frameNum: number): string {
-  return `/new_alejandra_frames/${String(frameNum).padStart(3, '0')}.jpg`;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return `${base}/new_alice_frames/${String(frameNum).padStart(3, '0')}.jpg`;
 }
 
 // ── Tipos públicos ────────────────────────────────────────────────────────────

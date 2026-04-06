@@ -16,7 +16,7 @@ const STORAGE_KEY = 'alejandra_settings';
 
 const DEFAULTS: AppSettings = {
   voiceEngine: 'polly',
-  geminiApiKey: 'AIzaSyCFTDT4NDIXWawU5FG11lHh0YOd-LZ6wv4',
+  geminiApiKey: 'AIzaSyAsuleeCL1g2PfeqfmhgaibAR_PireHQ_Y',
   geminiApiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
   piperModelId: 'es_AR-daniela-high',
   avatarSpeed: 1.1,   // 10% más rápido que el valor original de 200 ms/frame
