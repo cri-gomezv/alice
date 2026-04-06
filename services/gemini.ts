@@ -20,7 +20,7 @@
 //     al primer send_message de inicialización) — excepto para Marta
 //     y Alejandra cuyos prompts YA incluyen la instrucción de rol en
 //     el system, como hace la API de Triskeledu originalmente.
-//   - Cada personaje (florencia/marta/alejandra) tiene su propio
+//   - Cada personaje (alice/marta/alejandra) tiene su propio
 //     historial de sesión independiente, igual que en run.py donde
 //     cada `robot_key` es `{character_name}_{language}`.
 // ============================================================
@@ -35,7 +35,7 @@ const LANGUAGE = 'es';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
-export type CharacterName = 'florencia' | 'marta' | 'alejandra';
+export type CharacterName = 'alice' | 'marta' | 'alejandra';
 
 // Comandos válidos — equivalentes a valid_commands de run.py
 const VALID_COMMANDS = [
@@ -64,8 +64,8 @@ interface CharacterSession {
 // ── Estado del módulo (singleton, equivalente a robots{} de run.py) ───────────
 
 const sessions: Record<CharacterName, CharacterSession | null> = {
-    florencia: null,
-    marta:     null,
+    alice: null,
+    marta: null,
     alejandra: null,
 };
 
@@ -165,8 +165,8 @@ async function initSession(characterName: CharacterName): Promise<CharacterSessi
         const initReply = await callGemini(systemInstruction, [], initPrompt);
         // Guardamos el intercambio inicial en el historial
         session.history = [
-            { role: 'user',  parts: [{ text: initPrompt }] },
-            { role: 'model', parts: [{ text: initReply  }] },
+            { role: 'user', parts: [{ text: initPrompt }] },
+            { role: 'model', parts: [{ text: initReply }] },
         ];
     } catch (e) {
         console.warn('[GeminiService] No se pudo inicializar el chat del personaje:', e);
@@ -192,7 +192,7 @@ async function getSession(characterName: CharacterName): Promise<CharacterSessio
  * la latencia del primer mensaje (equivale al Robot() que crea run.py
  * la primera vez que se hace un request para ese usuario+personaje).
  */
-export async function preloadCharacter(characterName: CharacterName = 'florencia'): Promise<void> {
+export async function preloadCharacter(characterName: CharacterName = 'alice'): Promise<void> {
     await getSession(characterName);
 }
 
@@ -216,7 +216,7 @@ export async function ask(
     command: ValidCommand = 'USER_CHAT_TEXT_NORMAL'
 ): Promise<string> {
     const session = await getSession(characterName);
-    const params  = session.params;
+    const params = session.params;
 
     // Si el comando no es válido, usamos DEFAULT_QUESTION_PROMPT
     const prefix = VALID_COMMANDS.includes(command)
@@ -234,8 +234,8 @@ export async function ask(
     // Actualizamos el historial (equivalente al estado interno de `chat` en Python)
     session.history = [
         ...session.history,
-        { role: 'user',  parts: [{ text: q           }] },
-        { role: 'model', parts: [{ text: cleanReply  }] },
+        { role: 'user', parts: [{ text: q }] },
+        { role: 'model', parts: [{ text: cleanReply }] },
     ];
 
     return cleanReply;

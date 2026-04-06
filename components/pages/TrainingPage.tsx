@@ -3,28 +3,29 @@ import type { Page } from '../../App';
 import { PaperAirplaneIcon, ArrowTrendingUpIcon, AcademicCapIcon, MicrophoneIcon, SpeakerWaveIcon } from '../IconComponents';
 
 const StopMicIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-  </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+    </svg>
 );
 import { speak, stopAudio, resumeAudio } from '../../services/speech';
 import { preloadCharacter, ask, switchCharacter } from '../../services/gemini';
 import type { CharacterName } from '../../services/gemini';
 import { startLipSync, frameUrl } from '../../services/lipsync';
 import type { LipSyncHandle } from '../../services/lipsync';
+import { getSettings } from '../../services/settings';
 
 interface TrainingPageProps {
-  onBackToDashboard: () => void;
-  onNavigate: (page: Page, anchor?: string) => void;
+    onBackToDashboard: () => void;
+    onNavigate: (page: Page, anchor?: string) => void;
 }
 
 const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 // ── Mensajes de fallback por si Gemini falla al inicializar el personaje ──────
 const FALLBACK_GREETING: Record<CharacterName, string> = {
-    florencia: '¡Hola! Soy Florencia, tu coach de IA. Estoy aquí para ayudarte a practicar y simular conversaciones. Para comenzar, selecciona uno de los roles a continuación.',
-    marta:     'De acuerdo. Ahora soy Marta, tu cliente. Puedes empezar cuando quieras.',
+    alice: '¡Hola! Soy Alice, tu coach de IA. Estoy aquí para ayudarte a practicar y simular conversaciones. Para comenzar, selecciona uno de los roles a continuación.',
+    marta: 'De acuerdo. Ahora soy Marta, tu cliente. Puedes empezar cuando quieras.',
     alejandra: 'Perfecto. Soy Alejandra, la vendedora. ¿En qué te puedo ayudar?',
 };
 
@@ -32,37 +33,42 @@ const FALLBACK_GREETING: Record<CharacterName, string> = {
 // Equivale al primer `ask` de la API de Triskeledu con el command USER_CHAT_TEXT_NORMAL
 // que le indica al personaje cómo debe arrancar la simulación.
 const ROLE_START_INSTRUCTION: Record<CharacterName, string> = {
-    florencia: 'Inicia la sesión de coaching. Preséntate brevemente y pregunta al ejecutivo cuál quiere ser su objetivo de práctica hoy.',
-    marta:     'Inicia el roleplay. Salúdate brevemente como Marta, muestra interés en conocer las opciones de crédito hipotecario y haz tu primera pregunta natural.',
+    alice: 'Inicia la sesión de coaching. Preséntate brevemente y pregunta al ejecutivo cuál quiere ser su objetivo de práctica hoy.',
+    marta: 'Inicia el roleplay. Salúdate brevemente como Marta, muestra interés en conocer las opciones de crédito hipotecario y haz tu primera pregunta natural.',
     alejandra: 'Inicia el roleplay. Salúdate brevemente como Alejandra, ejecutiva BCI, y comienza la conversación de ventas con el cliente.',
 };
 
 const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNavigate }) => {
-    const [conversation, setConversation] = useState([{ type: 'florencia', text: FALLBACK_GREETING.florencia }]);
+    const [conversation, setConversation] = useState([{ type: 'alice', text: FALLBACK_GREETING.alice }]);
     const [userInput, setUserInput] = useState('');
     const [isThinking, setIsThinking] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isSettingRole, setIsSettingRole] = useState(false);
-    const [character, setCharacter] = useState<CharacterName>('florencia');
-    
+    const [character, setCharacter] = useState<CharacterName>('alice');
+
     const chatEndRef = useRef<HTMLDivElement>(null);
-    const recognitionRef    = useRef<any | null>(null);
-    const baseTextRef       = useRef('');
-    const silenceTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const currentInputRef   = useRef('');  // refleja userInput para acceso en callbacks
+    const recognitionRef = useRef<any | null>(null);
+    const baseTextRef = useRef('');
+    const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const currentInputRef = useRef('');  // refleja userInput para acceso en callbacks
     // autoSubmitRef apunta siempre a la última versión de handleUserResponse
-    const autoSubmitRef       = useRef<() => void>(() => {});
+    const autoSubmitRef = useRef<() => void>(() => { });
     // Modo conversación manos libres — mantiene escucha activa tras cada respuesta.
     // Usamos un ref (no solo state) para acceder al valor dentro de callbacks async.
     const isContinuousModeRef = useRef(false);
     const [isContinuousMode, setIsContinuousMode] = useState(false);
+    const isThinkingRef = useRef(false);
+    const isSpeakingRef = useRef(false);
+
     // Referencia al handle de lipsync activo. LipSyncHandle tiene .stop()
     const lipSyncRef = useRef<LipSyncHandle | null>(null);
     const animationIdRef = useRef(0);
 
     // Mantener currentInputRef en sync con userInput (para callbacks asincrónicos)
     useEffect(() => { currentInputRef.current = userInput; }, [userInput]);
+    useEffect(() => { isThinkingRef.current = isThinking; }, [isThinking]);
+    useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,9 +80,7 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
     // ── Helper: iniciar escucha limpia ────────────────────────────────────────
     const startListening = () => {
         if (!recognitionRef.current) return;
-        setUserInput('');
-        currentInputRef.current = '';
-        baseTextRef.current = '';
+        baseTextRef.current = currentInputRef.current; // preserva lo escrito
         try { recognitionRef.current.start(); } catch { /* ya activo */ }
         setIsListening(true);
     };
@@ -104,12 +108,15 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
         stopLipSync(); // cancelar cualquier animación anterior
 
         // Lanzar lipsync — corre independientemente del audio
+        // Leer la velocidad en el momento de hablar (refleja cambios en Settings sin recargar)
+        const avatarSpeed = getSettings().avatarSpeed ?? 1.1;
         lipSyncRef.current = startLipSync(
             text,
             (frame) => setAvatarFrame(frame),
             () => {
                 if (myId === animationIdRef.current) {
                     setIsSpeaking(false);
+                    isSpeakingRef.current = false;
                     setAvatarFrame(1);
                     lipSyncRef.current = null;
                     // Modo continuo: volver a escuchar cuando el avatar termina
@@ -117,12 +124,11 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
                         startListening();
                     }
                 }
-            }
+            },
+            avatarSpeed
         );
 
         // Lanzar audio en paralelo (puede fallar si AudioContext está suspendido)
-        const wordCount = text.split(/\s+/).filter(Boolean).length;
-        const estimatedMs = Math.max(wordCount * 430, 1800);
         const tStart = Date.now();
 
         try {
@@ -143,16 +149,35 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
             // Audio terminó normalmente → cerrar lipsync
             stopLipSync();
             setIsSpeaking(false);
+            isSpeakingRef.current = false;
+
+            // Reanudar escucha si estamos en modo contínuo
+            if (isContinuousModeRef.current && !isThinkingRef.current) {
+                startListening();
+            }
         }
         // Si audio falló inmediatamente, el onEnd del lipsync maneja el cierre
     };
 
-    useEffect(() => {
-        // Preload Florencia al arrancar (equivale a crear el Robot() en run.py)
-        preloadCharacter('florencia').catch(e => console.error('[TrainingPage] preload error:', e));
+    // ── Helper: espera un frame de render antes de iniciar la animación ────────
+    // Garantiza que el texto del globo de diálogo ya esté en el DOM cuando
+    // el avatar empieza a mover la boca.
+    const speakAfterRender = (text: string): Promise<void> =>
+        new Promise(resolve =>
+            requestAnimationFrame(() =>
+                requestAnimationFrame(() =>
+                    speakWithAnimation(text).then(resolve)
+                )
+            )
+        );
 
-        // Al montarse reproducimos el saludo inicial con animación garantizada
-        speakWithAnimation(FALLBACK_GREETING.florencia);
+    useEffect(() => {
+        // Preload Alice al arrancar (equivale a crear el Robot() en run.py)
+        preloadCharacter('alice').catch(e => console.error('[TrainingPage] preload error:', e));
+
+        // Al montarse reproducimos el saludo inicial — esperamos un frame para
+        // que el texto del globo esté en pantalla antes de mover los labios.
+        speakAfterRender(FALLBACK_GREETING.alice);
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps — speakWithAnimation es estable
 
@@ -173,17 +198,18 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
 
         recognition.onresult = (event: any) => {
             // Acumular solo los resultados de esta sesión de escucha
-            let finals   = '';
+            let finals = '';
             let interims = '';
             for (let i = 0; i < event.results.length; i++) {
                 if (event.results[i].isFinal) {
-                    finals   += event.results[i][0].transcript;
+                    finals += event.results[i][0].transcript;
                 } else {
                     interims += event.results[i][0].transcript;
                 }
             }
 
-            const fullText = (finals + interims).trim();
+            const prefix = baseTextRef.current ? baseTextRef.current + ' ' : '';
+            const fullText = prefix + (finals + interims).trim();
             setUserInput(fullText);
             currentInputRef.current = fullText;
 
@@ -195,7 +221,7 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
                 silenceTimerRef.current = setTimeout(() => {
                     silenceTimerRef.current = null;
                     // Detener reconocimiento
-                    try { recognition.stop(); } catch {}
+                    try { recognition.stop(); } catch { }
                     setIsListening(false);
                     // Auto-enviar si hay texto
                     if (currentInputRef.current.trim()) {
@@ -211,6 +237,15 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
             if (silenceTimerRef.current) {
                 clearTimeout(silenceTimerRef.current);
                 silenceTimerRef.current = null;
+            }
+            // Reactivar micrófono si seguimos en modo continuo y el avatar no está pensando o hablando
+            if (isContinuousModeRef.current && !isThinkingRef.current && !isSpeakingRef.current) {
+                try {
+                    recognitionRef.current.start();
+                    setIsListening(true);
+                } catch (e) {
+                    // ignorar si ya estaba activo
+                }
             }
         };
         recognition.onerror = (event: any) => {
@@ -245,40 +280,47 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
 
         let newCharacter: CharacterName;
 
-        if (role === 'cliente')  newCharacter = 'marta';
+        if (role === 'cliente') newCharacter = 'marta';
         else if (role === 'vendedor') newCharacter = 'alejandra';
-        else newCharacter = 'florencia';
+        else newCharacter = 'alice';
 
         setCharacter(newCharacter);
 
         try {
-            // switchCharacter() destruye la sesión previa del personaje y crea una nueva,
-            // igual que run.py cuando crea un nuevo Robot() para el mismo user+character.
-            // La respuesta de inicialización viene del DEFAULT_ASSISTANT_PROMT (system init).
-            const greetingFromInit = await switchCharacter(newCharacter, FALLBACK_GREETING[newCharacter]);
-
-            // Luego enviamos la instrucción de inicio de roleplay (equivale al primer ask
-            // con USER_CHAT_TEXT_NORMAL que hacía la API de Triskeledu al cambiar de rol).
-            const startReply = await ask(
-                ROLE_START_INSTRUCTION[newCharacter],
-                newCharacter,
-                'USER_CHAT_TEXT_NORMAL'
-            );
-
-            // Usamos el startReply como el mensaje visible de arranque (más natural)
-            const displayMessage = startReply || greetingFromInit;
-
+            // Muestra inmediatamente el mensaje de fallback para dar una sensación rápida de respuesta.
+            const displayMessage = FALLBACK_GREETING[newCharacter];
             const newAIMessage = { type: newCharacter, text: displayMessage };
             setConversation(prev => [...prev, newAIMessage]);
-            await speakWithAnimation(displayMessage);  // ← animación directa garantizada
+
+            setIsSettingRole(false); // libera UI de inmediato
+
+            // Dice la frase con voz
+            await speakAfterRender(displayMessage);
+
+            // Hacemos el init y enviamos el cambio de rol en background
+            switchCharacter(newCharacter, FALLBACK_GREETING[newCharacter])
+                .then(() => {
+                    ask(ROLE_START_INSTRUCTION[newCharacter], newCharacter, 'USER_CHAT_TEXT_NORMAL')
+                        .catch(e => console.warn('[Background init role]:', e));
+                })
+                .catch(e => console.warn('[Background switch character]:', e));
 
         } catch (error: any) {
+            setIsSettingRole(false);
             const msg = "Lo siento, tuve un problema al cambiar mi rol. Por favor, inténtalo de nuevo.";
             console.error('[TrainingPage] Error setting role:', error instanceof Error ? error.message : error);
             setConversation(prev => [...prev, { type: newCharacter, text: msg }]);
-            await speakWithAnimation(msg);  // ← animación directa garantizada
-        } finally {
-            setIsSettingRole(false);
+            await speakAfterRender(msg);
+        }
+    };
+
+    // ── Interrupción por clic en el avatar ────────────────────────────────────
+    const handleAvatarClick = () => {
+        if (isSpeaking) {
+            stopAudio();
+            stopLipSync();
+            setIsSpeaking(false);
+            speakWithAnimation("Ok.");
         }
     };
 
@@ -293,6 +335,7 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
 
         stopAudio();
         setIsSpeaking(false);
+        isSpeakingRef.current = false;
         stopLipSync(); // detener lipsync si el avatar estaba hablando
         if (isListening && recognitionRef.current) {
             recognitionRef.current.stop();
@@ -303,7 +346,10 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
         setConversation(prev => [...prev, userMessage]);
         const currentInput = userInput;
         setUserInput('');
+        currentInputRef.current = '';
+        baseTextRef.current = '';
         setIsThinking(true);
+        isThinkingRef.current = true;
 
         try {
             // ask() es el equivalente exacto de robot.ask(user_text, command) de galatea.py:
@@ -321,7 +367,9 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
 
             setIsThinking(false);
             setConversation(prev => [...prev, aiResponse]);
-            await speakWithAnimation(aiResponse.text);  // ← animación directa garantizada
+            // Esperamos dos frames de render para que el texto esté en pantalla
+            // antes de que el avatar empiece a mover la boca.
+            await speakAfterRender(aiResponse.text);
 
         } catch (error: any) {
             console.error('[TrainingPage] Error fetching from Gemini:', error instanceof Error ? error.message : error);
@@ -351,7 +399,7 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
             isContinuousModeRef.current = false;
             setIsContinuousMode(false);
             if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-            try { recognitionRef.current.stop(); } catch {}
+            try { recognitionRef.current.stop(); } catch { }
             setIsListening(false);
             stopAudio();
             setIsSpeaking(false);
@@ -370,15 +418,15 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
     // ── Render ────────────────────────────────────────────────────────────────
 
     const fundamentalConcepts = [
-        { title: 'Mentalidad y Preparación',    anchor: 'mentalidad-preparacion' },
+        { title: 'Mentalidad y Preparación', anchor: 'mentalidad-preparacion' },
         { title: 'Estructura de la Conversación', anchor: 'proceso-venta' },
-        { title: 'Manejo de Objeciones',         anchor: 'manejo-objeciones' },
-        { title: 'Criterios y Normas BCI',       anchor: 'cumplimiento' },
-        { title: 'Estrategias de Cierre',        anchor: 'estrategias-cierre' },
+        { title: 'Manejo de Objeciones', anchor: 'manejo-objeciones' },
+        { title: 'Criterios y Normas BCI', anchor: 'cumplimiento' },
+        { title: 'Estrategias de Cierre', anchor: 'estrategias-cierre' },
     ];
 
-    const avatarImageUrl = frameUrl(avatarFrame); // new_alice_frames/001-026.jpg
-    const characterName  = character.charAt(0).toUpperCase() + character.slice(1);
+    const avatarImageUrl = frameUrl(avatarFrame); // new_alejandra_frames/001-026.jpg
+    const characterName = character.charAt(0).toUpperCase() + character.slice(1);
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -406,7 +454,9 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
                                 <img
                                     src={avatarImageUrl}
                                     alt={`Avatar de ${characterName}`}
-                                    className="w-64 h-64 rounded-full object-cover border-4 border-indigo-200 mx-auto"
+                                    onClick={handleAvatarClick}
+                                    title="Haz clic para interrumpir al avatar"
+                                    className="w-64 h-64 rounded-full object-cover border-4 border-indigo-200 mx-auto cursor-pointer transition-transform hover:scale-105"
                                 />
                                 <h2 className="text-2xl font-bold text-gray-800 mt-2">{characterName}</h2>
                                 <p className="text-sm text-green-500 font-semibold">En línea</p>
@@ -489,7 +539,7 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
                                 placeholder="Escribe tu respuesta aquí..."
                                 className="flex-grow p-2 border border-gray-200 bg-gray-100 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none placeholder-gray-500"
                                 rows={2}
-                                disabled={isThinking || isSettingRole}
+                                disabled={isSettingRole} // Permite escribir aunque esté procesando (isThinking)
                             />
                             <button
                                 type="submit"
@@ -498,23 +548,29 @@ const TrainingPage: React.FC<TrainingPageProps> = ({ onBackToDashboard, onNaviga
                             >
                                 <PaperAirplaneIcon className="h-6 w-6" />
                             </button>
-                            <button
-                                type="button"
-                                onClick={handleMicClick}
-                                aria-label={isContinuousMode ? 'Detener modo conversación' : 'Activar modo conversación manos libres'}
-                                title={isContinuousMode ? 'Haz clic para detener la escucha automática' : 'Haz clic para conversar sin tocar botones'}
-                                className={`p-3 rounded-full transition-all duration-200 ${
-                                    isContinuousMode
-                                        ? 'bg-red-500 text-white shadow-lg ' + (isListening ? 'animate-pulse' : '')
+                            <div className="relative flex flex-col items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={handleMicClick}
+                                    aria-label={isContinuousMode ? 'Detener modo conversación' : 'Activar modo conversación manos libres'}
+                                    title={isContinuousMode ? 'Haz clic para detener la escucha automática' : 'Haz clic para conversar sin tocar botones'}
+                                    className={`p-3 rounded-full transition-all duration-200 ${isContinuousMode
+                                        ? 'bg-red-50 text-red-600 border border-red-500 shadow-sm hover:bg-red-100 '
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
-                                disabled={!SpeechRecognition || isSettingRole}
-                            >
-                                {isContinuousMode
-                                    ? <StopMicIcon className="h-6 w-6" />
-                                    : <MicrophoneIcon className="h-6 w-6" />
-                                }
-                            </button>
+                                        }`}
+                                    disabled={!SpeechRecognition || isSettingRole}
+                                >
+                                    {isContinuousMode
+                                        ? <StopMicIcon className={`h-6 w-6 ${isListening ? 'animate-pulse' : ''}`} />
+                                        : <MicrophoneIcon className="h-6 w-6" />
+                                    }
+                                </button>
+                                {isContinuousMode && (
+                                    <span className="absolute -bottom-4 text-red-600 font-bold tracking-widest text-[9px] uppercase animate-pulse w-max">
+                                        Grabando
+                                    </span>
+                                )}
+                            </div>
                         </form>
                     </div>
 

@@ -4,6 +4,8 @@ import Hero from './components/Hero';
 import Features from './components/Features';
 import Solutions from './components/Solutions';
 import Services from './components/Services';
+import HowItWorks from './components/HowItWorks';
+import Results from './components/Results';
 import Testimonial from './components/Testimonial';
 import Faq from './components/Faq';
 import Cta from './components/Cta';
@@ -57,6 +59,8 @@ const App: React.FC = () => {
               <Hero />
               <Features />
               <Solutions />
+              <HowItWorks />
+              <Results />
               <Services />
               <Testimonial />
               <Faq />

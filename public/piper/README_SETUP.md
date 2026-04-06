@@ -237,7 +237,7 @@ Para uso comercial: verificar la licencia de cada modelo individualmente en Hugg
 Primero, entramos al contenedor mapeando nuestra carpeta de trabajo:
 
 ```bash
-cd ~/2026/alice/public/piper
+cd ~/2026/alejandra/public/piper
 docker run -it -v $(pwd):/wasm -w /wasm debian:11.3
 ```
 
@@ -274,7 +274,7 @@ npm install piper-wasm
 ```
 
 4. Organización de Archivos Finales (Dentro de Docker)
-Dado que la compilación manual de Piper suele fallar en la generación de datos dentro de Docker, el método exitoso fue extraer los archivos del paquete npm instalado y organizarlos en la estructura que Alice necesita:
+Dado que la compilación manual de Piper suele fallar en la generación de datos dentro de Docker, el método exitoso fue extraer los archivos del paquete npm instalado y organizarlos en la estructura que Alejandra necesita:
 
 ```bash
 # Crear estructura de carpetas
@@ -308,7 +308,7 @@ Ahora simplemente sal del contenedor. Los archivos ya estarán en tu disco duro:
 exit
 
 # Verificar en tu Ubuntu
-cd ~/2026/alice/public/piper
+cd ~/2026/alejandra/public/piper
 ls -R
 ```
 

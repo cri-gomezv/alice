@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import type { Page } from '../../App';
-import { 
-    BriefcaseIcon, BellIcon, UserCircleIcon, StarIcon, TrophyIcon, 
-    ClockIcon, LightBulbIcon, BookOpenIcon, UserGroupIcon, 
+import {
+    BriefcaseIcon, BellIcon, UserCircleIcon, StarIcon, TrophyIcon,
+    ClockIcon, LightBulbIcon, BookOpenIcon, UserGroupIcon,
     QuestionMarkCircleIcon, ArrowTrendingUpIcon, ChatBubbleBottomCenterTextIcon,
     CheckCircleIcon, CogIcon
 } from '../IconComponents';
@@ -12,9 +12,9 @@ import type { AppSettings } from '../../services/settings';
 import { loadPiperModel, isPiperModelLoaded } from '../../services/piperTTS';
 
 interface DashboardProps {
-  user: string;
-  onLogout: () => void;
-  onNavigate: (page: Page) => void;
+    user: string;
+    onLogout: () => void;
+    onNavigate: (page: Page) => void;
 }
 
 const AvatarFab: React.FC = () => (
@@ -28,16 +28,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
     const displayName = user === 'student' ? 'Juan' : user;
 
     // ── Estado del modal de configuración ─────────────────────────────────────
-    const [showSettings, setShowSettings]   = useState(false);
-    const [settings, setSettings]           = useState<AppSettings>(() => getSettings());
-    const [loadProgress, setLoadProgress]   = useState<number | null>(null);
-    const [loadLabel, setLoadLabel]         = useState('');
-    const [modelLoaded, setModelLoaded]     = useState(() =>
+    const [showSettings, setShowSettings] = useState(false);
+    const [settings, setSettings] = useState<AppSettings>(() => getSettings());
+    const [loadProgress, setLoadProgress] = useState<number | null>(null);
+    const [loadLabel, setLoadLabel] = useState('');
+    const [modelLoaded, setModelLoaded] = useState(() =>
         isPiperModelLoaded(getSettings().piperModelId)
     );
-    const [testText, setTestText]           = useState('Hola, esta es mi voz neural en español.');
-    const [isTesting, setIsTesting]         = useState(false);
-    const [testStatus, setTestStatus]       = useState('');
+    const [testText, setTestText] = useState('Hola, esta es mi voz neural en español.');
+    const [isTesting, setIsTesting] = useState(false);
+    const [testStatus, setTestStatus] = useState('');
 
     const handleSave = useCallback((patch: Partial<AppSettings>) => {
         const updated = { ...settings, ...patch };
@@ -83,7 +83,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
             const ctx = new AudioContext();
             if (ctx.state === 'suspended') await ctx.resume();
             const decoded = await ctx.decodeAudioData(audioBuffer);
-            const source  = ctx.createBufferSource();
+            const source = ctx.createBufferSource();
             source.buffer = decoded;
             source.connect(ctx.destination);
             source.onended = () => { setTestStatus(''); setIsTesting(false); ctx.close(); };
@@ -105,7 +105,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
         { icon: TrophyIcon, label: 'Nivel Oro en Ventas', color: 'bg-amber-100 text-amber-600' },
         { icon: CheckCircleIcon, label: 'Excelente en reclamos', color: 'bg-green-100 text-green-600' },
     ];
-    
+
     const ranking = [
         { name: 'Ana Sofía', score: '9,820 pts' },
         { name: 'Carlos Pérez', score: '9,750 pts' },
@@ -272,6 +272,37 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
                                 </div>
                             </section>
 
+                            {/* ── Sección: Avatar ───────────────────────────── */}
+                            <section>
+                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Avatar</h3>
+                                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-medium text-gray-700">Velocidad de animación labial</label>
+                                        <span className="text-sm font-bold text-indigo-600 tabular-nums">
+                                            {(settings.avatarSpeed ?? 1.1).toFixed(1)}×
+                                            <span className="text-xs font-normal text-gray-400 ml-1">
+                                                ({Math.round(200 / (settings.avatarSpeed ?? 1.1))} ms/frame)
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <input
+                                        id="avatar-speed-slider"
+                                        type="range"
+                                        min={0.5}
+                                        max={3.0}
+                                        step={0.1}
+                                        value={settings.avatarSpeed ?? 1.1}
+                                        onChange={e => handleSave({ avatarSpeed: parseFloat(e.target.value) })}
+                                        className="w-full accent-indigo-600 cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-xs text-gray-400 -mt-1">
+                                        <span>🐢 Lenta (0.5×)</span>
+                                        <span>Normal (1.0×)</span>
+                                        <span>⚡ Rápida (3.0×)</span>
+                                    </div>
+                                </div>
+                            </section>
+
                             {/* ── Sección: Gemini API ───────────────────────── */}
                             <section>
                                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Gemini API</h3>
@@ -321,7 +352,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
                     <div className="lg:col-span-2 space-y-8">
                         {/* Welcome Card */}
                         <div className="bg-white p-6 rounded-xl shadow-md flex items-start space-x-6">
-                            <img src="https://i.pravatar.cc/150?u=avatar" alt="Avatar" className="w-24 h-24 rounded-full border-4 border-indigo-200"/>
+                            <img src="https://i.pravatar.cc/150?u=avatar" alt="Avatar" className="w-24 h-24 rounded-full border-4 border-indigo-200" />
                             <div className="flex-1">
                                 <h1 className="text-3xl font-bold text-gray-800">¡Hola, {displayName}!</h1>
                                 <p className="mt-2 text-lg text-gray-600">"Hoy te acompañaré a mejorar tus habilidades en atención al cliente bancario."</p>
@@ -330,14 +361,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
 
                         {/* CTA */}
                         <div className="text-center">
-                             <button 
+                            <button
                                 onClick={handleTrainClick}
                                 className="w-full md:w-auto bg-indigo-600 text-white font-bold py-4 px-10 rounded-lg text-xl hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                             >
                                 Entrenar con Alejandra
                             </button>
                         </div>
-                        
+
                         {/* Progress Panel */}
                         <div className="bg-white p-6 rounded-xl shadow-md">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">Tu Progreso</h2>
@@ -348,15 +379,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
                                         <span className="text-sm font-medium text-indigo-700">75%</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-4">
-                                        <div className="bg-indigo-500 h-4 rounded-full" style={{width: '75%'}}></div>
+                                        <div className="bg-indigo-500 h-4 rounded-full" style={{ width: '75%' }}></div>
                                     </div>
                                 </div>
                                 <div className="bg-indigo-50 p-4 rounded-lg flex items-center space-x-4">
-                                     <ArrowTrendingUpIcon className="h-8 w-8 text-indigo-600"/>
-                                     <div>
+                                    <ArrowTrendingUpIcon className="h-8 w-8 text-indigo-600" />
+                                    <div>
                                         <p className="font-semibold text-gray-700">Próximo objetivo:</p>
                                         <p className="text-indigo-800 font-bold">Simulación de venta de un crédito hipotecario</p>
-                                     </div>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                                     {metrics.map(metric => {
@@ -375,63 +406,64 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onNavigate }) => 
 
                         {/* Feedback Card */}
                         <div className="bg-white p-6 rounded-xl shadow-md">
-                             <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center"><LightBulbIcon className="h-7 w-7 mr-3 text-yellow-500"/>Retroalimentación Instantánea</h2>
-                             <div className="space-y-4">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center"><LightBulbIcon className="h-7 w-7 mr-3 text-yellow-500" />Retroalimentación Instantánea</h2>
+                            <div className="space-y-4">
                                 <div className="bg-blue-50 p-4 rounded-lg">
                                     <p className="font-semibold text-blue-800">Última interacción:</p>
                                     <p className="text-gray-700">“Ayer mejoraste tu claridad al explicar productos.”</p>
                                 </div>
-                                 <div className="bg-green-50 p-4 rounded-lg">
+                                <div className="bg-green-50 p-4 rounded-lg">
                                     <p className="font-semibold text-green-800">Recomendación personalizada:</p>
                                     <p className="text-gray-700">“Hoy te sugiero reforzar normas de cumplimiento.”</p>
                                 </div>
-                             </div>
+                            </div>
                         </div>
 
                     </div>
-                    
+
                     {/* Side Column */}
                     <div className="space-y-8">
                         {/* Gamification */}
                         <div className="bg-white p-6 rounded-xl shadow-md">
-                             <h3 className="text-2xl font-bold text-gray-800 mb-4">Gamificación</h3>
-                             <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Gamificación</h3>
+                            <div className="space-y-4">
                                 <p className="font-semibold text-gray-700">Medallas Obtenidas:</p>
                                 <div className="flex flex-wrap gap-2">
                                     {medals.map(medal => {
                                         const Icon = medal.icon;
                                         return (
-                                        <span key={medal.label} className={`flex items-center px-3 py-1 rounded-full text-sm font-semibold ${medal.color}`}>
-                                            <Icon className="h-5 w-5 mr-1.5"/> {medal.label}
-                                        </span>
-                                    )})}
+                                            <span key={medal.label} className={`flex items-center px-3 py-1 rounded-full text-sm font-semibold ${medal.color}`}>
+                                                <Icon className="h-5 w-5 mr-1.5" /> {medal.label}
+                                            </span>
+                                        )
+                                    })}
                                 </div>
-                             </div>
-                             <div className="mt-6">
-                                <p className="font-semibold text-gray-700 mb-2 flex items-center"><UserGroupIcon className="h-5 w-5 mr-2 text-gray-500"/>Ranking del Equipo:</p>
+                            </div>
+                            <div className="mt-6">
+                                <p className="font-semibold text-gray-700 mb-2 flex items-center"><UserGroupIcon className="h-5 w-5 mr-2 text-gray-500" />Ranking del Equipo:</p>
                                 <ul className="space-y-2">
-                                   {ranking.map((player) => (
-                                     <li key={player.name} className={`flex justify-between p-2 rounded-md ${player.highlight ? 'bg-indigo-100' : ''}`}>
-                                        <span className={`font-medium ${player.highlight ? 'text-indigo-800' : 'text-gray-600'}`}>{player.name}</span>
-                                        <span className={`font-bold ${player.highlight ? 'text-indigo-800' : 'text-gray-800'}`}>{player.score}</span>
-                                     </li>
-                                   ))}
+                                    {ranking.map((player) => (
+                                        <li key={player.name} className={`flex justify-between p-2 rounded-md ${player.highlight ? 'bg-indigo-100' : ''}`}>
+                                            <span className={`font-medium ${player.highlight ? 'text-indigo-800' : 'text-gray-600'}`}>{player.name}</span>
+                                            <span className={`font-bold ${player.highlight ? 'text-indigo-800' : 'text-gray-800'}`}>{player.score}</span>
+                                        </li>
+                                    ))}
                                 </ul>
-                             </div>
+                            </div>
                         </div>
 
                         {/* Resources */}
-                         <div className="bg-white p-6 rounded-xl shadow-md">
-                             <h3 className="text-2xl font-bold text-gray-800 mb-4">Recursos Rápidos</h3>
+                        <div className="bg-white p-6 rounded-xl shadow-md">
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Recursos Rápidos</h3>
                             <div className="space-y-3">
                                 <a href="#" className="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <BookOpenIcon className="h-6 w-6 text-indigo-600 mr-3"/>
+                                    <BookOpenIcon className="h-6 w-6 text-indigo-600 mr-3" />
                                     <span className="font-medium text-gray-700">Biblioteca de procedimientos</span>
                                 </a>
                                 <div className="bg-gray-50 p-3 rounded-lg">
                                     <div className="flex items-center">
-                                       <QuestionMarkCircleIcon className="h-6 w-6 text-indigo-600 mr-3"/>
-                                       <span className="font-medium text-gray-700">Pregunta del día</span>
+                                        <QuestionMarkCircleIcon className="h-6 w-6 text-indigo-600 mr-3" />
+                                        <span className="font-medium text-gray-700">Pregunta del día</span>
                                     </div>
                                     <p className="mt-2 text-sm text-gray-600 pl-9">Si un cliente pregunta por la tasa de interés de un préstamo, ¿cuál es el primer dato que debes solicitar?</p>
                                 </div>

@@ -74,7 +74,7 @@ export const SOLUTIONS: Solution[] = [
   {
     icon: ChartBarIcon,
     title: 'Información basada en datos',
-    description: 'Obtenga información de gran valor con análisis exhaustivos. Realice un seguimiento de métricas, identifique tendencias y demuestre el impacto del aprendizaje.',
+    description: 'Obtenga información de gran valor con análisis exhaustivos. Realejandra un seguimiento de métricas, identifique tendencias y demuestre el impacto del aprendizaje.',
   },
   {
     icon: ChatAlt2Icon,
@@ -89,58 +89,58 @@ export const SOLUTIONS: Solution[] = [
 ];
 
 export const SERVICES: Service[] = [
-    {
-        category: "Servicios gestionados",
-        items: [
-            {
-                title: "Migración",
-                description: "Trasladamos sus datos de usuarios y cursos desde sistemas heredados o hojas de cálculo a TalentFlow, garantizando una migración sin fisuras."
-            }
-        ]
-    },
-    {
-        category: "Servicios de consultoría",
-        items: [
-            {
-                title: "Incorporación de productos",
-                description: "Nuestros expertos guían a sus administradores a través de los pasos necesarios para cada producto, garantizando un lanzamiento exitoso y puntual."
-            },
-            {
-                title: "Transición del personal",
-                description: "Capacitamos a su nuevo administrador para una transición fluida, asegurando la continuidad de la experiencia de aprendizaje sin interrupciones."
-            },
-            {
-                title: "Horas de servicios profesionales",
-                description: "Proporcionamos asistencia especial para abordar sus prioridades de aprendizaje más críticas con nuestra oferta de servicios a su disposición."
-            },
-            {
-                title: "Consultoría de API",
-                description: "Analizamos sus flujos de trabajo de API para automatizar procesos, maximizando el rendimiento, la eficiencia y la precisión de sus integraciones."
-            }
-        ]
-    },
-    {
-        category: "Servicios estratégicos",
-        items: [
-            {
-                title: "Optimización del aprendizaje",
-                description: "Realizamos un análisis profundo de su plataforma para recomendar y ejecutar cambios que aseguren el éxito a largo plazo de sus programas."
-            },
-            {
-                title: "Gestor técnico de cuentas (TAM)",
-                description: "Un experto técnico y estratégico colaborará con usted a largo plazo para ayudarle a obtener el máximo valor de su inversión en aprendizaje."
-            }
-        ]
-    },
-     {
-        category: "Servicios de asistencia",
-        items: [
-            {
-                title: "Asistencia Premier",
-                description: "Ofrecemos paquetes integrales y escalonados de formación y asistencia para que su plataforma y su empresa puedan crecer sin interrupciones."
-            }
-        ]
-    }
+  {
+    category: "Servicios gestionados",
+    items: [
+      {
+        title: "Migración",
+        description: "Trasladamos sus datos de usuarios y cursos desde sistemas heredados o hojas de cálculo a TalentFlow, garantizando una migración sin fisuras."
+      }
+    ]
+  },
+  {
+    category: "Servicios de consultoría",
+    items: [
+      {
+        title: "Incorporación de productos",
+        description: "Nuestros expertos guían a sus administradores a través de los pasos necesarios para cada producto, garantizando un lanzamiento exitoso y puntual."
+      },
+      {
+        title: "Transición del personal",
+        description: "Capacitamos a su nuevo administrador para una transición fluida, asegurando la continuidad de la experiencia de aprendizaje sin interrupciones."
+      },
+      {
+        title: "Horas de servicios profesionales",
+        description: "Proporcionamos asistencia especial para abordar sus prioridades de aprendizaje más críticas con nuestra oferta de servicios a su disposición."
+      },
+      {
+        title: "Consultoría de API",
+        description: "Analizamos sus flujos de trabajo de API para automatizar procesos, maximizando el rendimiento, la eficiencia y la precisión de sus integraciones."
+      }
+    ]
+  },
+  {
+    category: "Servicios estratégicos",
+    items: [
+      {
+        title: "Optimización del aprendizaje",
+        description: "Realizamos un análisis profundo de su plataforma para recomendar y ejecutar cambios que aseguren el éxito a largo plazo de sus programas."
+      },
+      {
+        title: "Gestor técnico de cuentas (TAM)",
+        description: "Un experto técnico y estratégico colaborará con usted a largo plazo para ayudarle a obtener el máximo valor de su inversión en aprendizaje."
+      }
+    ]
+  },
+  {
+    category: "Servicios de asistencia",
+    items: [
+      {
+        title: "Asistencia Premier",
+        description: "Ofrecemos paquetes integrales y escalonados de formación y asistencia para que su plataforma y su empresa puedan crecer sin interrupciones."
+      }
+    ]
+  }
 ];
 
 export const FAQS: FaqItem[] = [
